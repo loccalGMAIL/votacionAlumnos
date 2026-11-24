@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Listas\RelationManagers;
 
+use App\Models\Cargo;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -48,7 +49,9 @@ class CandidatosRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $q) => $q->join('cargos', 'cargos.id', '=', 'candidatos.cargo_id')->orderBy('cargos.orden')->select('candidatos.*'))
+            // Orden de la boleta: por el "orden" del cargo. El parámetro DEBE llamarse $query: Filament inyecta
+            // la consulta por nombre, y con otro nombre recibe un Builder vacío (sin modelo) y la tabla falla.
+            ->modifyQueryUsing(fn (Builder $query) => $query->orderBy(Cargo::select('orden')->whereColumn('cargos.id', 'candidatos.cargo_id')))
             ->columns([
                 ImageColumn::make('foto')->label('Foto')->disk('public')->circular(),
                 TextColumn::make('cargo.nombre')->label('Cargo'),

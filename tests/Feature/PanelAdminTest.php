@@ -2,8 +2,12 @@
 
 use App\Actions\EmitirVoto;
 use App\Actions\GenerarAccesoDirecto;
+use App\Enums\EstadoEleccion;
 use App\Filament\Pages\Mesa;
+use App\Filament\Resources\Listas\Pages\EditLista;
+use App\Filament\Resources\Listas\RelationManagers\CandidatosRelationManager;
 use App\Filament\Resources\Puestos\Pages\ListPuestos;
+use App\Models\Candidato;
 use App\Models\Eleccion;
 use App\Models\Lista;
 use App\Models\Puesto;
@@ -85,6 +89,36 @@ it('el admin puede desvincular un puesto y el siguiente acceso directo lo vincul
 
     $this->get(route('puesto.registrar', $puesto->token).'?m=11-22-33-44-55-66')->assertRedirect('/votar');
     expect($puesto->fresh()->mac)->toBe('11-22-33-44-55-66');
+});
+
+it('la tabla de candidatos de una lista se muestra en el orden de los cargos', function (EstadoEleccion $estado) {
+    $e = Eleccion::create(['nombre' => 'CE', 'anio' => 2026]);
+    $secretario = $e->cargos()->create(['nombre' => 'Secretario', 'orden' => 2]);
+    $presidente = $e->cargos()->create(['nombre' => 'Presidente', 'orden' => 1]);
+    $lista = $e->listas()->create(['numero' => 1, 'nombre' => 'Uno']);
+    $cSecretario = Candidato::create(['lista_id' => $lista->id, 'cargo_id' => $secretario->id, 'apellido' => 'Lopez', 'nombre' => 'Ana']);
+    $cPresidente = Candidato::create(['lista_id' => $lista->id, 'cargo_id' => $presidente->id, 'apellido' => 'Gomez', 'nombre' => 'Luis']);
+    $e->update(['estado' => $estado]);
+
+    Livewire\Livewire::actingAs(User::factory()->create(['rol' => 'admin']))
+        ->test(CandidatosRelationManager::class, ['ownerRecord' => $lista->fresh(), 'pageClass' => EditLista::class])
+        ->assertSuccessful()
+        ->assertCanSeeTableRecords([$cPresidente, $cSecretario], inOrder: true);
+})->with([EstadoEleccion::Borrador, EstadoEleccion::Cerrada]);
+
+it('una lista de una elección ya abierta se ve pero sus campos no se pueden editar', function () {
+    $e = Eleccion::create(['nombre' => 'CE', 'anio' => 2026]);
+    $lista = $e->listas()->create(['numero' => 1, 'nombre' => 'Uno']);
+    $admin = User::factory()->create(['rol' => 'admin']);
+
+    Livewire\Livewire::actingAs($admin)->test(EditLista::class, ['record' => $lista->getKey()])
+        ->assertFormFieldIsEnabled('nombre');
+
+    $e->update(['estado' => EstadoEleccion::Cerrada]);
+
+    Livewire\Livewire::actingAs($admin)->test(EditLista::class, ['record' => $lista->getKey()])
+        ->assertFormFieldIsDisabled('nombre')
+        ->assertActionHidden('delete');
 });
 
 it('todas las pantallas del panel renderizan para el admin', function (string $ruta) {

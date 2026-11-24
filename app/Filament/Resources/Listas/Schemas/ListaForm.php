@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Listas\Schemas;
 
 use App\Models\Eleccion;
+use App\Models\Lista;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -13,7 +14,8 @@ class ListaForm
 {
     public static function configure(Schema $schema, bool $conEleccion = true): Schema
     {
-        return $schema->components([
+        // Fuera de "En preparación" la lista se ve pero no se edita.
+        return $schema->disabled(fn (?Lista $record) => $record !== null && ! $record->eleccion->enPreparacion())->components([
             ...($conEleccion ? [
                 Select::make('eleccion_id')->label('Elección')
                     ->relationship('eleccion', 'nombre')
