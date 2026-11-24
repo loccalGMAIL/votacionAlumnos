@@ -1,0 +1,19 @@
+<?php
+
+namespace App\Filament\Resources\Puestos\Pages;
+
+use App\Filament\Resources\Puestos\PuestoResource;
+use Filament\Actions\DeleteAction;
+use Filament\Resources\Pages\EditRecord;
+
+class EditPuesto extends EditRecord
+{
+    protected static string $resource = PuestoResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            DeleteAction::make(),
+        ];
+    }
+}

@@ -1,0 +1,99 @@
+@import 'tailwindcss';
+
+@source '../../storage/framework/views/*.php';
+@source '../views';
+
+@theme {
+    /* Sin fuentes externas: el kiosco no debe depender de internet más que de la propia app. */
+    --font-sans: ui-sans-serif, system-ui, 'Segoe UI', Roboto, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+    --color-colegio-blue: #3493e4;
+    --color-colegio-navy: #2f4c70;
+    --color-colegio-gold: #a46d34;
+    --color-colegio-red: #e80808;
+    --color-colegio-cream: #d1cbb3;
+}
+
+/* Cuarto oscuro: sin selección de texto ni menú contextual accidental. */
+.kiosco {
+    user-select: none;
+    -webkit-user-select: none;
+    color: #243b53;
+    background: radial-gradient(ellipse at 12% 10%, #3493e410, transparent 48%), radial-gradient(ellipse at 90% 90%, #a46d340b, transparent 45%), #f5f7fa;
+}
+
+[x-cloak] { display: none !important; }
+
+.kiosco :focus-visible {
+    outline: 3px solid var(--color-colegio-blue);
+    outline-offset: 4px;
+}
+
+.school-header {
+    background: #ffffffeb;
+    border-bottom: 1px solid #e2e8f0;
+    position: relative;
+}
+
+.school-header::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 3px;
+    background: linear-gradient(90deg, var(--color-colegio-navy) 0% 68%, var(--color-colegio-gold) 68% 90%, var(--color-colegio-red) 90%);
+}
+
+.school-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 1.5rem;
+    box-shadow: 0 16px 48px -24px #2f4c7033;
+}
+
+.school-eyebrow {
+    color: var(--color-colegio-gold);
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+}
+
+.school-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .6rem;
+    min-height: 46px;
+    padding: .7rem 1.4rem;
+    border-radius: .75rem;
+    font-size: .9rem;
+    font-weight: 650;
+    cursor: pointer;
+    transition: background .18s, box-shadow .18s;
+}
+
+.school-button-primary { background: var(--color-colegio-navy); color: white; }
+.school-button-primary:hover:not(:disabled) { background: #223d5d; box-shadow: 0 4px 12px #2f4c7026; }
+.school-button-secondary { background: white; border: 1px solid #cbd5e1; color: var(--color-colegio-navy); }
+.school-button-secondary:hover:not(:disabled) { background: #f1f5f9; }
+.school-button:disabled { opacity: .45; cursor: not-allowed; }
+.school-error { border: 1px solid #fecaca; border-radius: .75rem; background: #fff1f2; color: #9f1239; padding: .8rem 1rem; font-size: .875rem; }
+
+.ballot-card {
+    border: 2px solid #e2e8f0;
+    border-radius: 1rem;
+    overflow: hidden;
+    background: white;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color .18s, box-shadow .18s;
+}
+.ballot-card:hover { border-color: #94a3b8; }
+.ballot-card[aria-pressed="true"] { border-color: var(--color-colegio-navy); box-shadow: 0 0 0 3px #3493e425, 0 8px 24px #2f4c7010; }
+
+@media (prefers-reduced-motion: reduce) {
+    .kiosco *, .kiosco *::before, .kiosco *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+    }
+}
