@@ -37,7 +37,7 @@ Route::livewire('/votar', CuartoOscuro::class)
 
 // Acta de escrutinio: solo el directivo, y recién con la votación cerrada.
 Route::get('/acta', function () {
-    abort_unless(auth()->user()->esDirectivo(), 403);
+    abort_unless(auth()->user()->esDirectivo() && auth()->user()->activo, 403);
 
     $eleccion = Eleccion::actual();
     abort_unless(

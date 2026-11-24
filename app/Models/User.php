@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password', 'rol'])]
+#[Fillable(['name', 'email', 'password', 'rol', 'activo'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements FilamentUser
 {
@@ -22,12 +22,31 @@ class User extends Authenticatable implements FilamentUser
 
     public const ROL_DIRECTIVO = 'directivo';
 
+    /** @var array<string, string> */
+    public const ROLES = [
+        self::ROL_ADMIN => 'Administrador',
+        self::ROL_DIRECTIVO => 'Directivo',
+    ];
+
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'activo' => 'boolean',
+            'ultimo_acceso_at' => 'datetime',
         ];
+    }
+
+    public function esUltimoAdminActivo(): bool
+    {
+        return $this->esAdmin()
+            && $this->activo
+            && ! static::query()
+                ->where('rol', self::ROL_ADMIN)
+                ->where('activo', true)
+                ->whereKeyNot($this->getKey())
+                ->exists();
     }
 
     public function esAdmin(): bool
@@ -42,6 +61,6 @@ class User extends Authenticatable implements FilamentUser
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->esAdmin() || $this->esDirectivo();
+        return $this->activo && ($this->esAdmin() || $this->esDirectivo());
     }
 }

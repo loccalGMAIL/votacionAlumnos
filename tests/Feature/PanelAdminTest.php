@@ -132,6 +132,7 @@ it('todas las pantallas del panel renderizan para el admin', function (string $r
     '', 'mesa', 'elecciones', 'elecciones/create', 'elecciones/{eleccion}/edit',
     'listas', 'listas/create', 'listas/{lista}/edit',
     'votantes', 'votantes/create', 'puestos', 'puestos/create', 'puestos/{puesto}/edit',
+    'users', 'users/create',
 ]);
 
 it('el admin ve la mesa en modo lectura: no puede operarla', function () {
