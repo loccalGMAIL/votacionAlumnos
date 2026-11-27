@@ -20,7 +20,7 @@
             <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border {{ $activa ? 'border-colegio-navy bg-colegio-navy text-white' : 'border-slate-300' }}">@if ($activa)<x-heroicon-m-check class="h-4 w-4" />@endif</span>
         @endisset
     </div>
-    <ul class="divide-y divide-slate-100 px-5">
+    <ul class="grid grid-cols-2 gap-x-4 px-5 py-2">
         @foreach ($cargos as $cargo)
             @php($c = $lista->candidatos->firstWhere('cargo_id', $cargo->id))
             @if ($c)
