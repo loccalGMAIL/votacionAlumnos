@@ -6,9 +6,9 @@
     <div class="h-1.5" style="background: {{ $lista->color }}"></div>
     <div class="flex items-center gap-3 border-b border-slate-100 px-5 py-4">
         @if ($lista->logo)
-            <img src="{{ asset('storage/'.$lista->logo) }}" alt="" class="h-11 w-11 rounded-xl border border-slate-100 bg-white object-contain p-1">
+            <img src="{{ asset('storage/'.$lista->logo) }}" alt="" class="h-16 w-16 shrink-0 rounded-xl border border-slate-100 bg-white object-contain p-1">
         @else
-            <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-lg font-bold" style="color: {{ $lista->color }}">{{ $lista->numero }}</span>
+            <span class="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-2xl font-bold" style="color: {{ $lista->color }}">{{ $lista->numero }}</span>
         @endif
         <div class="min-w-0 flex-1">
             <p class="text-[10px] font-bold tracking-widest text-slate-400 uppercase">Lista {{ $lista->numero }}</p>
