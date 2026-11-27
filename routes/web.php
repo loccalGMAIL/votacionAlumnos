@@ -60,5 +60,16 @@ Route::get('/acta', function () {
     ]);
 })->middleware('auth')->name('acta');
 
+// Vista previa de la boleta para el admin: la misma tarjeta del cuarto oscuro, en cualquier estado y sin votar.
+Route::get('/vista-previa/{eleccion}', function (Eleccion $eleccion) {
+    abort_unless(auth()->user()->esAdmin() && auth()->user()->activo, 403);
+
+    return view('votar.vista-previa', [
+        'eleccion' => $eleccion,
+        'listas' => $eleccion->listas()->with('candidatos.cargo')->get(),
+        'cargos' => $eleccion->cargos,
+    ]);
+})->middleware('auth')->name('boleta.vista-previa');
+
 // Resultados / festejo: el componente se niega a mostrar nada hasta que el directivo los habilite.
 Route::livewire('/resultados', Resultados::class)->name('resultados');

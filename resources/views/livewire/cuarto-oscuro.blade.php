@@ -129,41 +129,7 @@
             </div>
             <div class="grid items-start gap-5 {{ $listas->count() === 1 ? 'mx-auto max-w-lg' : ($listas->count() === 2 ? 'md:grid-cols-2' : 'md:grid-cols-2 xl:grid-cols-3') }}">
                 @foreach ($listas as $lista)
-                    @php($activa = $seleccion === $lista->id)
-                    <button type="button" wire:click="elegir({{ $lista->id }})" wire:key="lista-{{ $lista->id }}" aria-pressed="{{ $activa ? 'true' : 'false' }}" class="ballot-card w-full">
-                        <div class="h-1.5" style="background: {{ $lista->color }}"></div>
-                        <div class="flex items-center gap-3 border-b border-slate-100 px-5 py-4">
-                            @if ($lista->logo)
-                                <img src="{{ asset('storage/'.$lista->logo) }}" alt="" class="h-11 w-11 rounded-xl border border-slate-100 bg-white object-contain p-1">
-                            @else
-                                <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-lg font-bold" style="color: {{ $lista->color }}">{{ $lista->numero }}</span>
-                            @endif
-                            <div class="min-w-0 flex-1">
-                                <p class="text-[10px] font-bold tracking-widest text-slate-400 uppercase">Lista {{ $lista->numero }}</p>
-                                <h3 class="mt-0.5 text-lg font-semibold leading-snug text-colegio-navy">{{ $lista->nombre }}</h3>
-                            </div>
-                            <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border {{ $activa ? 'border-colegio-navy bg-colegio-navy text-white' : 'border-slate-300' }}">@if ($activa)<x-heroicon-m-check class="h-4 w-4" />@endif</span>
-                        </div>
-                        <ul class="divide-y divide-slate-100 px-5">
-                            @foreach ($cargos as $cargo)
-                                @php($c = $lista->candidatos->firstWhere('cargo_id', $cargo->id))
-                                @if ($c)
-                                    <li wire:key="candidato-{{ $lista->id }}-{{ $cargo->id }}" class="flex items-center gap-3 py-2.5">
-                                        @if ($c->foto)
-                                            <img src="{{ asset('storage/'.$c->foto) }}" alt="" class="h-9 w-9 shrink-0 rounded-full object-cover">
-                                        @else
-                                            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-400"><x-heroicon-o-user class="h-4 w-4" /></span>
-                                        @endif
-                                        <div class="min-w-0">
-                                            <p class="text-[10px] font-medium tracking-wide text-slate-400 uppercase">{{ $cargo->nombre }}</p>
-                                            <p class="text-sm font-medium break-words">{{ $c->nombreCompleto() }}</p>
-                                        </div>
-                                    </li>
-                                @endif
-                            @endforeach
-                        </ul>
-                        <div class="border-t border-slate-100 px-5 py-3 text-center text-xs font-semibold {{ $activa ? 'bg-colegio-navy/5 text-colegio-navy' : 'bg-slate-50 text-slate-500' }}">{{ $activa ? 'Lista seleccionada' : 'Seleccionar esta lista' }}</div>
-                    </button>
+                    <x-boleta.lista :lista="$lista" :cargos="$cargos" :activa="$seleccion === $lista->id" wire:click="elegir({{ $lista->id }})" wire:key="lista-{{ $lista->id }}" />
                 @endforeach
             </div>
         </main>

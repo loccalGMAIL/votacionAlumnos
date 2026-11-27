@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Listas\RelationManagers;
 
 use App\Models\Cargo;
+use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -35,7 +36,15 @@ class CandidatosRelationManager extends RelationManager
 
         return $schema->components([
             Select::make('cargo_id')->label('Cargo')
-                ->options($lista->eleccion->cargos()->pluck('nombre', 'id'))
+                // Closure: así las opciones se recalculan después de crear un cargo con el botón "+".
+                ->options(fn () => $lista->eleccion->cargos()->pluck('nombre', 'id'))
+                ->createOptionForm([
+                    TextInput::make('nombre')->label('Cargo')->required()->maxLength(80),
+                    TextInput::make('orden')->label('Orden en la boleta')->numeric()->required()
+                        ->default(fn () => ($lista->eleccion->cargos()->max('orden') ?? 0) + 1),
+                ])
+                ->createOptionUsing(fn (array $data): int => $lista->eleccion->cargos()->create($data)->getKey())
+                ->createOptionAction(fn (Action $action) => $action->modalHeading('Nuevo cargo')->modalSubmitActionLabel('Crear cargo'))
                 ->required()
                 ->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->where('lista_id', $lista->id))
                 ->validationMessages(['unique' => 'Esta lista ya tiene un candidato para ese cargo.']),

@@ -220,3 +220,42 @@ it('la mesa del directivo abre, cierra y habilita los resultados con contraseña
         ->callAction('publicar', ['password' => 'cambiar-esta-clave']);
     expect($e->fresh()->estado->value)->toBe('publicada');
 });
+
+it('al cargar un candidato se puede crear el cargo que falta y queda en la elección de la lista', function () {
+    $e = Eleccion::create(['nombre' => 'CE', 'anio' => 2026]);
+    $e->cargos()->create(['nombre' => 'Presidente', 'orden' => 1]);
+    $lista = $e->listas()->create(['numero' => 1, 'nombre' => 'Uno']);
+    $otra = Eleccion::create(['nombre' => 'Otra', 'anio' => 2025]);
+
+    Livewire\Livewire::actingAs(User::factory()->create(['rol' => 'admin']))
+        ->test(CandidatosRelationManager::class, ['ownerRecord' => $lista, 'pageClass' => EditLista::class])
+        ->mountAction(TestAction::make('create')->table())
+        ->callAction(TestAction::make('createOption')->schemaComponent('cargo_id', schema: 'mountedActionSchema0'), data: ['nombre' => 'Vocal'])
+        ->assertHasNoActionErrors()
+        ->assertSchemaStateSet(['cargo_id' => $e->cargos()->where('nombre', 'Vocal')->value('id')], 'mountedActionSchema0');
+
+    expect($e->cargos()->where('nombre', 'Vocal')->value('orden'))->toBe(2)
+        ->and($otra->cargos()->count())->toBe(0);
+});
+
+it('el admin ve la vista previa de la boleta con los cargos sin candidato marcados', function () {
+    $e = Eleccion::create(['nombre' => 'CE', 'anio' => 2026]);
+    $presidente = $e->cargos()->create(['nombre' => 'Presidente', 'orden' => 1]);
+    $e->cargos()->create(['nombre' => 'Tesorero', 'orden' => 2]);
+    $lista = $e->listas()->create(['numero' => 7, 'nombre' => 'Lista Celeste']);
+    Candidato::create(['lista_id' => $lista->id, 'cargo_id' => $presidente->id, 'apellido' => 'Gomez', 'nombre' => 'Luis']);
+
+    $this->actingAs(User::factory()->create(['rol' => 'admin']))
+        ->get(route('boleta.vista-previa', $e))
+        ->assertOk()
+        ->assertSeeInOrder(['Lista Celeste', 'Presidente', 'GOMEZ, Luis', 'Tesorero', 'Sin candidato'])
+        ->assertSee('No se registra ningún voto');
+});
+
+it('la vista previa de la boleta es solo para admins activos', function () {
+    $e = Eleccion::create(['nombre' => 'CE', 'anio' => 2026]);
+
+    $this->get(route('boleta.vista-previa', $e))->assertRedirect();
+    $this->actingAs(User::factory()->create(['rol' => 'directivo']))->get(route('boleta.vista-previa', $e))->assertForbidden();
+    $this->actingAs(User::factory()->create(['rol' => 'admin', 'activo' => false]))->get(route('boleta.vista-previa', $e))->assertForbidden();
+});
