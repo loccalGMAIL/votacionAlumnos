@@ -4,8 +4,10 @@
         n: 3,
         avanzar() {
             if (this.etapa === 'espera') { this.etapa = 'cuenta'; this.n = 3; this.contar(); }
-            else if (this.etapa === 'barras') { this.etapa = 'ganador'; this.festejar(); }
+            else if (this.etapa === 'barras') { this.etapa = 'ganador'; this.reveladoEn = Date.now(); this.festejar(); }
+            else if (this.etapa === 'ganador' && Date.now() - this.reveladoEn > 1500) { window.location.href = '{{ route('filament.admin.pages.dashboard') }}'; }
         },
+        reveladoEn: 0,
         contar() {
             const t = setInterval(() => {
                 this.n--;
@@ -99,5 +101,6 @@
             <h2 class="text-6xl font-black">Empate</h2>
             <p class="mt-4 text-2xl text-slate-300">No hay una lista ganadora: corresponde definir según el reglamento.</p>
         @endif
+        <p class="absolute bottom-6 text-xs text-white/50">Clic o espacio para volver al panel</p>
     </div>
 </div>

@@ -7,6 +7,7 @@ use App\Filament\Pages\Mesa;
 use App\Filament\Resources\Listas\Pages\EditLista;
 use App\Filament\Resources\Listas\RelationManagers\CandidatosRelationManager;
 use App\Filament\Resources\Puestos\Pages\ListPuestos;
+use App\Filament\Widgets\ControlVotacion;
 use App\Models\Candidato;
 use App\Models\Eleccion;
 use App\Models\Lista;
@@ -258,4 +259,34 @@ it('la vista previa de la boleta es solo para admins activos', function () {
     $this->get(route('boleta.vista-previa', $e))->assertRedirect();
     $this->actingAs(User::factory()->create(['rol' => 'directivo']))->get(route('boleta.vista-previa', $e))->assertForbidden();
     $this->actingAs(User::factory()->create(['rol' => 'admin', 'activo' => false]))->get(route('boleta.vista-previa', $e))->assertForbidden();
+});
+
+it('el dashboard del directivo inicia y detiene la votación, y luego ofrece el acta', function () {
+    $this->seed(DemoSeeder::class);
+    $directivo = User::where('rol', 'directivo')->first();
+    $e = Eleccion::first();
+
+    $this->actingAs($directivo)->get('/admin')->assertOk()->assertSee('Iniciar votación');
+
+    Livewire\Livewire::actingAs($directivo)->test(ControlVotacion::class)
+        ->assertActionVisible('abrir')
+        ->assertActionHidden('acta')
+        ->callAction('abrir');
+    expect($e->fresh()->estado->value)->toBe('abierta');
+
+    Livewire\Livewire::actingAs($directivo)->test(ControlVotacion::class)
+        ->callAction('cerrar');
+    expect($e->fresh()->estado->value)->toBe('cerrada');
+
+    Livewire\Livewire::actingAs($directivo)->test(ControlVotacion::class)
+        ->assertActionVisible('acta')
+        ->assertActionVisible('publicar')
+        ->assertActionHidden('ver');
+});
+
+it('el dashboard del admin no muestra los controles de la votación', function () {
+    $this->seed(DemoSeeder::class);
+    $admin = User::where('rol', 'admin')->first();
+
+    $this->actingAs($admin)->get('/admin')->assertOk()->assertDontSee('Iniciar votación');
 });

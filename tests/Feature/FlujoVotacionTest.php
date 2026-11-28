@@ -170,7 +170,9 @@ it('los resultados se muestran una vez publicados', function () {
     [$e, $l1] = escenario(EstadoEleccion::Publicada);
     ConteoVoto::create(['eleccion_id' => $e->id, 'lista_id' => $l1->id, 'cantidad' => 3]);
 
-    $this->get('/resultados')->assertOk()->assertSee('Uno');
+    $this->get('/resultados')->assertOk()->assertSee('Uno')
+        ->assertSee(route('filament.admin.pages.dashboard'))
+        ->assertSee('Clic o espacio para volver al panel');
 });
 
 it('transiciones de estado: abrir → cerrar → publicar, con sus reglas', function () {
